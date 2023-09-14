@@ -7,7 +7,13 @@ import random
 import sys
 import traceback
 import logging
-from ../configs import config_loader as cfg_loader
+
+# 先加入绝对路径，否则会报错，注意__file__表示的是当前执行文件的路径
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))    
+
+import configs.config_loader as cfg_loader
 
 
 logger = logging.getLogger()
