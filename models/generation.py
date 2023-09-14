@@ -6,6 +6,7 @@ from torch.nn import functional as F
 import time
 
 class Generator(object):
+
     def __init__(self, model, exp_name, threshold = 0.1, checkpoint = None, device = torch.device("cuda")):
         self.model = model.to(device)
         self.model.eval()
@@ -16,7 +17,6 @@ class Generator(object):
 
 
     def generate_point_cloud(self, data, num_steps = 10, num_points = 900000, filter_val = 0.009):
-
         start = time.time()
         inputs = data['inputs'].to(self.device)
 
@@ -49,7 +49,6 @@ class Generator(object):
                 samples = samples.detach()
                 samples.requires_grad = True
 
-
             print('finished refinement')
 
             if not i == 0:
@@ -68,7 +67,6 @@ class Generator(object):
         duration = time.time() - start
 
         return samples_cpu, duration
-
 
 
     def load_checkpoint(self, checkpoint):

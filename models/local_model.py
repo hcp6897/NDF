@@ -97,7 +97,6 @@ class NDF(nn.Module):
         return f_0, f_1, f_2, f_3, f_4, f_5, f_6
 
     def decoder(self, p, f_0, f_1, f_2, f_3, f_4, f_5, f_6):
-
         p_features = p.transpose(1, -1)
         p = p.unsqueeze(1).unsqueeze(1)
         p = torch.cat([p + d for d in self.displacments], dim=2)

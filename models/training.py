@@ -9,8 +9,6 @@ import numpy as np
 import time
 
 
-
-
 class Trainer(object):
 
     def __init__(self, model, device, train_dataset, val_dataset, exp_name, optimizer='Adam', lr = 1e-4, threshold = 0.1):
@@ -51,8 +49,6 @@ class Trainer(object):
         df_gt = batch.get('df').to(device) #(Batch,num_points)
         inputs = batch.get('inputs').to(device)
 
-
-
         df_pred = self.model(p,inputs) #(Batch,num_points)
 
         loss_i = torch.nn.L1Loss(reduction='none')(torch.clamp(df_pred, max=self.max_dist),torch.clamp(df_gt, max=self.max_dist))# out = (B,num_points) by componentwise comparing vecots of size num_samples:
@@ -69,7 +65,6 @@ class Trainer(object):
         for epoch in range(start, epochs):
             sum_loss = 0
             print('Start epoch {}'.format(epoch))
-
 
             for batch in train_data_loader:
                 #save model
@@ -97,13 +92,8 @@ class Trainer(object):
                 print("Current loss: {}".format(loss / self.train_dataset.num_sample_points))
                 sum_loss += loss
 
-
-
-
             self.writer.add_scalar('training loss last batch', loss, epoch)
             self.writer.add_scalar('training loss batch avg', sum_loss / len(train_data_loader), epoch)
-
-
 
 
     def save_checkpoint(self, epoch, training_time):
@@ -113,8 +103,6 @@ class Trainer(object):
                         'training_time': training_time ,'epoch':epoch,
                         'model_state_dict': self.model.state_dict(),
                         'optimizer_state_dict': self.optimizer.state_dict()}, path)
-
-
 
     def load_checkpoint(self):
         checkpoints = glob(self.checkpoint_path+'/*')

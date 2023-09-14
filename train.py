@@ -9,7 +9,6 @@ cfg = cfg_loader.get_config()
 net = model.NDF()
 
 
-
 train_dataset = voxelized_data.VoxelizedDataset('train',
                                           res=cfg.input_res,
                                           pointcloud_samples=cfg.num_points,
@@ -20,6 +19,7 @@ train_dataset = voxelized_data.VoxelizedDataset('train',
                                           num_workers=30,
                                           sample_distribution=cfg.sample_ratio,
                                           sample_sigmas=cfg.sample_std_dev)
+                                          
 val_dataset = voxelized_data.VoxelizedDataset('val',
                                           res=cfg.input_res,
                                           pointcloud_samples=cfg.num_points,
@@ -30,7 +30,6 @@ val_dataset = voxelized_data.VoxelizedDataset('val',
                                           num_workers=30,
                                           sample_distribution=cfg.sample_ratio,
                                           sample_sigmas=cfg.sample_std_dev)
-
 
 
 trainer = training.Trainer(net,
