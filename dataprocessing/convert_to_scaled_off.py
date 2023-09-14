@@ -7,13 +7,15 @@ import random
 import sys
 import traceback
 import logging
-import configs.config_loader as cfg_loader
+from ../configs import config_loader as cfg_loader
 
 
 logger = logging.getLogger()
 logger.setLevel(logging.ERROR)
 
+
 class HiddenPrints:
+    
     def __enter__(self):
         self._original_stdout = sys.stdout
         sys.stdout = open(os.devnull, 'w')
@@ -24,12 +26,12 @@ class HiddenPrints:
 
 
 def as_mesh(scene_or_mesh):
-    """
-    Convert a possible scene to a mesh.
+    r"""Convert a possible scene to a mesh.
 
     If conversion occurs, the returned mesh has only vertex and face data.
     Suggested by https://github.com/mikedh/trimesh/issues/507
     """
+    
     if isinstance(scene_or_mesh, trimesh.Scene):
         if len(scene_or_mesh.geometry) == 0:
             mesh = None  # empty scene
@@ -41,11 +43,11 @@ def as_mesh(scene_or_mesh):
     else:
         assert(isinstance(scene_or_mesh, trimesh.Trimesh))
         mesh = scene_or_mesh
+        
     return mesh
 
 
 def to_off(path):
-
     file_path = os.path.dirname(path)
     file_name = os.path.splitext(os.path.basename(path))[0]
     output_file = os.path.join(file_path,file_name + '_scaled.off')
