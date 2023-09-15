@@ -41,5 +41,6 @@ trainer = training.Trainer(net,
                            optimizer=cfg.optimizer,
                            lr=cfg.lr)
 
+
 if __name__ == '__main__':
     trainer.train_model(cfg.num_epochs)

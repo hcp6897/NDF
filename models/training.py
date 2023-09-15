@@ -99,13 +99,14 @@ class Trainer(object):
             self.writer.add_scalar('training loss batch avg', sum_loss / len(train_data_loader), epoch)
 
     def save_checkpoint(self, epoch, training_time):
-        path = self.checkpoint_path + 'checkpoint_{}h:{}m:{}s_{}.tar'.format(
-            *[*convertSecs(training_time), training_time])
+        path = self.checkpoint_path + 'checkpoint_{}h:{}m:{}s_{}.tar'.format(*[*convertSecs(training_time), training_time])
+        
         if not os.path.exists(path):
-            torch.save({  # 'state': torch.cuda.get_rng_state_all(),
-                'training_time': training_time, 'epoch': epoch,
-                'model_state_dict': self.model.state_dict(),
-                'optimizer_state_dict': self.optimizer.state_dict()}, path)
+            # 'state': torch.cuda.get_rng_state_all(),
+            torch.save({'training_time': training_time, 
+                        'epoch': epoch,
+                        'model_state_dict': self.model.state_dict(),
+                        'optimizer_state_dict': self.optimizer.state_dict()}, path)
 
     def load_checkpoint(self):
         checkpoints = glob(self.checkpoint_path + '/*')
@@ -132,7 +133,7 @@ class Trainer(object):
     def compute_val_loss(self):
         self.model.eval()
 
-        sum_val_loss = 0
+        sum_val_loss = 0    
         num_batches = 15
         for _ in range(num_batches):
             try:
