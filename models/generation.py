@@ -5,21 +5,20 @@ import numpy as np
 from torch.nn import functional as F
 import time
 
+
 class Generator(object):
 
-    def __init__(self, model, exp_name, threshold = 0.1, checkpoint = None, device = torch.device("cuda")):
+    def __init__(self, model, exp_name, threshold=0.1, checkpoint=None, device=torch.device("cuda")):
         self.model = model.to(device)
         self.model.eval()
         self.device = device
-        self.checkpoint_path = os.path.dirname(__file__) + '/../experiments/{}/checkpoints/'.format( exp_name)
+        self.checkpoint_path = os.path.dirname(__file__) + '/../experiments/{}/checkpoints/'.format(exp_name)
         self.load_checkpoint(checkpoint)
         self.threshold = threshold
 
-
-    def generate_point_cloud(self, data, num_steps = 10, num_points = 900000, filter_val = 0.009):
+    def generate_point_cloud(self, data, num_steps=10, num_points=900000, filter_val=0.009):
         start = time.time()
         inputs = data['inputs'].to(self.device)
-
 
         for param in self.model.parameters():
             param.requires_grad = False
@@ -45,7 +44,8 @@ class Generator(object):
                 samples = samples.detach()
                 df_pred = df_pred.detach()
                 inputs = inputs.detach()
-                samples = samples - F.normalize(gradient, dim=2) * df_pred.reshape(-1, 1)  # better use Tensor.copy method?
+                samples = samples - F.normalize(gradient, dim=2) * df_pred.reshape(-1,
+                                                                                   1)  # better use Tensor.copy method?
                 samples = samples.detach()
                 samples.requires_grad = True
 
@@ -67,7 +67,6 @@ class Generator(object):
         duration = time.time() - start
 
         return samples_cpu, duration
-
 
     def load_checkpoint(self, checkpoint):
         checkpoints = glob(self.checkpoint_path + '/*')
@@ -96,6 +95,7 @@ def convertMillis(millis):
     minutes = int((millis / (1000 * 60)) % 60)
     hours = int((millis / (1000 * 60 * 60)))
     return hours, minutes, seconds
+
 
 def convertSecs(sec):
     seconds = int(sec % 60)

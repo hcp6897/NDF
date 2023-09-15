@@ -59,4 +59,5 @@ def gen_iterator(out_path, dataset, gen_p):
                 export_path + 'dense_point_cloud_{}.off'.format(num_steps))
 
 
-gen_iterator(out_path, dataset, gen)
+if __name__ == '__main__':
+    gen_iterator(out_path, dataset, gen)

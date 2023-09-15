@@ -1,26 +1,22 @@
-import trimesh
-import igl
-import numpy as np
-import glob
-import multiprocessing as mp
-from multiprocessing import Pool
+import gc
 import os
 import traceback
-from functools import partial
-import random
-import gc
-import configs.config_loader as cfg_loader
+
+import igl
+import numpy as np
+import trimesh
 
 # number of distance field samples generated per object
 sample_num = 100000
+
 
 def boundary_sampling(path, sigma):
     try:
 
         out_path = os.path.dirname(path)
         file_name = os.path.splitext(os.path.basename(path))[0]
-        input_file = os.path.join(out_path,file_name + '_scaled.off')
-        out_file = out_path + '/boundary_{}_samples.npz'.format( sigma)
+        input_file = os.path.join(out_path, file_name + '_scaled.off')
+        out_file = out_path + '/boundary_{}_samples.npz'.format(sigma)
 
         if os.path.exists(out_file):
             print('Exists: {}'.format(out_file))
@@ -44,13 +40,11 @@ def boundary_sampling(path, sigma):
         else:
             df = np.abs(igl.signed_distance(boundary_points, mesh.vertices, mesh.faces)[0])
 
-
-        np.savez(out_file, points=boundary_points, df = df, grid_coords= grid_coords)
+        np.savez(out_file, points=boundary_points, df=df, grid_coords=grid_coords)
         print('Finished: {}'.format(path))
 
     except:
         print('Error with {}: {}'.format(path, traceback.format_exc()))
-
 
     del mesh, df, boundary_points, grid_coords, points
     gc.collect()

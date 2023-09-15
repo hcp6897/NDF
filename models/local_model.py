@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 # 1D conv usage:
 # batch_size (N) = #3D objects , channels = features, signal_lengt (L) (convolution dimension) = #point samples
 # kernel_size = 1 i.e. every convolution over only all features of one point sample
@@ -12,26 +13,25 @@ import torch.nn.functional as F
 
 class NDF(nn.Module):
 
-
     def __init__(self, hidden_dim=256):
         super(NDF, self).__init__()
 
-        self.conv_in = nn.Conv3d(1, 16, 3, padding=1, padding_mode='border')  # out: 256 ->m.p. 128
-        self.conv_0 = nn.Conv3d(16, 32, 3, padding=1, padding_mode='border')  # out: 128
-        self.conv_0_1 = nn.Conv3d(32, 32, 3, padding=1, padding_mode='border')  # out: 128 ->m.p. 64
-        self.conv_1 = nn.Conv3d(32, 64, 3, padding=1, padding_mode='border')  # out: 64
-        self.conv_1_1 = nn.Conv3d(64, 64, 3, padding=1, padding_mode='border')  # out: 64 -> mp 32
-        self.conv_2 = nn.Conv3d(64, 128, 3, padding=1, padding_mode='border')  # out: 32
-        self.conv_2_1 = nn.Conv3d(128, 128, 3, padding=1, padding_mode='border')  # out: 32 -> mp 16
-        self.conv_3 = nn.Conv3d(128, 128, 3, padding=1, padding_mode='border')  # out: 16
-        self.conv_3_1 = nn.Conv3d(128, 128, 3, padding=1, padding_mode='border')  # out: 16 -> mp 8
-        self.conv_4 = nn.Conv3d(128, 128, 3, padding=1, padding_mode='border')  # out: 8
-        self.conv_4_1 = nn.Conv3d(128, 128, 3, padding=1, padding_mode='border')  # out: 8
+        self.conv_in = nn.Conv3d(1, 16, 3, padding=1, padding_mode='reflect')  # out: 256 ->m.p. 128
+        self.conv_0 = nn.Conv3d(16, 32, 3, padding=1, padding_mode='reflect')  # out: 128
+        self.conv_0_1 = nn.Conv3d(32, 32, 3, padding=1, padding_mode='reflect')  # out: 128 ->m.p. 64
+        self.conv_1 = nn.Conv3d(32, 64, 3, padding=1, padding_mode='reflect')  # out: 64
+        self.conv_1_1 = nn.Conv3d(64, 64, 3, padding=1, padding_mode='reflect')  # out: 64 -> mp 32
+        self.conv_2 = nn.Conv3d(64, 128, 3, padding=1, padding_mode='reflect')  # out: 32
+        self.conv_2_1 = nn.Conv3d(128, 128, 3, padding=1, padding_mode='reflect')  # out: 32 -> mp 16
+        self.conv_3 = nn.Conv3d(128, 128, 3, padding=1, padding_mode='reflect')  # out: 16
+        self.conv_3_1 = nn.Conv3d(128, 128, 3, padding=1, padding_mode='reflect')  # out: 16 -> mp 8
+        self.conv_4 = nn.Conv3d(128, 128, 3, padding=1, padding_mode='reflect')  # out: 8
+        self.conv_4_1 = nn.Conv3d(128, 128, 3, padding=1, padding_mode='zeros')  # out: 8
 
-        feature_size = (1 +  16 + 32 + 64 + 128 + 128 + 128) * 7 + 3
+        feature_size = (1 + 16 + 32 + 64 + 128 + 128 + 128) * 7 + 3
         self.fc_0 = nn.Conv1d(feature_size, hidden_dim * 2, 1)
-        self.fc_1 = nn.Conv1d(hidden_dim *2, hidden_dim, 1)
-        self.fc_2 = nn.Conv1d(hidden_dim , hidden_dim, 1)
+        self.fc_1 = nn.Conv1d(hidden_dim * 2, hidden_dim, 1)
+        self.fc_2 = nn.Conv1d(hidden_dim, hidden_dim, 1)
         self.fc_out = nn.Conv1d(hidden_dim, 1, 1)
         self.actvn = nn.ReLU()
 
@@ -44,7 +44,6 @@ class NDF(nn.Module):
         self.conv3_1_bn = nn.BatchNorm3d(128)
         self.conv4_1_bn = nn.BatchNorm3d(128)
 
-
         displacment = 0.0722
         displacments = []
         displacments.append([0, 0, 0])
@@ -56,7 +55,7 @@ class NDF(nn.Module):
 
         self.displacments = torch.Tensor(displacments).cuda()
 
-    def encoder(self,x):
+    def encoder(self, x):
         x = x.unsqueeze(1)
         f_0 = x
 
@@ -125,7 +124,7 @@ class NDF(nn.Module):
         net = self.actvn(self.fc_out(net))
         out = net.squeeze(1)
 
-        return  out
+        return out
 
     def forward(self, p, x):
         out = self.decoder(p, *self.encoder(x))

@@ -11,11 +11,11 @@ import time
 
 class Trainer(object):
 
-    def __init__(self, model, device, train_dataset, val_dataset, exp_name, optimizer='Adam', lr = 1e-4, threshold = 0.1):
+    def __init__(self, model, device, train_dataset, val_dataset, exp_name, optimizer='Adam', lr=1e-4, threshold=0.1):
         self.model = model.to(device)
         self.device = device
         if optimizer == 'Adam':
-            self.optimizer = optim.Adam(self.model.parameters(), lr= lr)
+            self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
         if optimizer == 'Adadelta':
             self.optimizer = optim.Adadelta(self.model.parameters())
         if optimizer == 'RMSprop':
@@ -23,8 +23,8 @@ class Trainer(object):
 
         self.train_dataset = train_dataset
         self.val_dataset = val_dataset
-        self.exp_path = os.path.dirname(__file__) + '/../experiments/{}/'.format( exp_name)
-        self.checkpoint_path = self.exp_path + 'checkpoints/'.format( exp_name)
+        self.exp_path = os.path.dirname(__file__) + '/../experiments/{}/'.format(exp_name)
+        self.checkpoint_path = self.exp_path + 'checkpoints/'.format(exp_name)
         if not os.path.exists(self.checkpoint_path):
             print(self.checkpoint_path)
             os.makedirs(self.checkpoint_path)
@@ -32,8 +32,7 @@ class Trainer(object):
         self.val_min = None
         self.max_dist = threshold
 
-
-    def train_step(self,batch):
+    def train_step(self, batch):
         self.model.train()
         self.optimizer.zero_grad()
         loss = self.compute_loss(batch)
@@ -42,17 +41,21 @@ class Trainer(object):
 
         return loss.item()
 
-    def compute_loss(self,batch):
+    def compute_loss(self, batch):
         device = self.device
 
         p = batch.get('grid_coords').to(device)
-        df_gt = batch.get('df').to(device) #(Batch,num_points)
+        df_gt = batch.get('df').to(device)  # (Batch,num_points)
         inputs = batch.get('inputs').to(device)
 
-        df_pred = self.model(p,inputs) #(Batch,num_points)
+        df_pred = self.model(p, inputs)  # (Batch,num_points)
 
-        loss_i = torch.nn.L1Loss(reduction='none')(torch.clamp(df_pred, max=self.max_dist),torch.clamp(df_gt, max=self.max_dist))# out = (B,num_points) by componentwise comparing vecots of size num_samples:
-        loss = loss_i.sum(-1).mean() # loss_i summed over all #num_samples samples -> out = (B,1) and mean over batch -> out = (1)
+        # out = (B,num_points) by componentwise comparing vecots of size num_samples:
+        loss_i = torch.nn.L1Loss(reduction='none')(torch.clamp(df_pred, max=self.max_dist),
+                                                   torch.clamp(df_gt, max=self.max_dist))
+
+        # loss_i summed over all #num_samples samples -> out = (B,1) and mean over batch -> out = (1)
+        loss = loss_i.sum(-1).mean()
 
         return loss
 
@@ -67,7 +70,7 @@ class Trainer(object):
             print('Start epoch {}'.format(epoch))
 
             for batch in train_data_loader:
-                #save model
+                # save model
                 iteration_duration = time.time() - iteration_start_time
                 if iteration_duration > 60 * 60:  # eve model every X min and at start
                     training_time += iteration_duration
@@ -87,7 +90,7 @@ class Trainer(object):
 
                     self.writer.add_scalar('val loss batch avg', val_loss, epoch)
 
-                #optimize model
+                # optimize model
                 loss = self.train_step(batch)
                 print("Current loss: {}".format(loss / self.train_dataset.num_sample_points))
                 sum_loss += loss
@@ -95,25 +98,26 @@ class Trainer(object):
             self.writer.add_scalar('training loss last batch', loss, epoch)
             self.writer.add_scalar('training loss batch avg', sum_loss / len(train_data_loader), epoch)
 
-
     def save_checkpoint(self, epoch, training_time):
-        path = self.checkpoint_path + 'checkpoint_{}h:{}m:{}s_{}.tar'.format(*[*convertSecs(training_time),training_time])
+        path = self.checkpoint_path + 'checkpoint_{}h:{}m:{}s_{}.tar'.format(
+            *[*convertSecs(training_time), training_time])
         if not os.path.exists(path):
-            torch.save({ #'state': torch.cuda.get_rng_state_all(),
-                        'training_time': training_time ,'epoch':epoch,
-                        'model_state_dict': self.model.state_dict(),
-                        'optimizer_state_dict': self.optimizer.state_dict()}, path)
+            torch.save({  # 'state': torch.cuda.get_rng_state_all(),
+                'training_time': training_time, 'epoch': epoch,
+                'model_state_dict': self.model.state_dict(),
+                'optimizer_state_dict': self.optimizer.state_dict()}, path)
 
     def load_checkpoint(self):
-        checkpoints = glob(self.checkpoint_path+'/*')
+        checkpoints = glob(self.checkpoint_path + '/*')
         if len(checkpoints) == 0:
             print('No checkpoints found at {}'.format(self.checkpoint_path))
-            return 0,0
+            return 0, 0
 
         checkpoints = [os.path.splitext(os.path.basename(path))[0].split('_')[-1] for path in checkpoints]
         checkpoints = np.array(checkpoints, dtype=float)
         checkpoints = np.sort(checkpoints)
-        path = self.checkpoint_path + 'checkpoint_{}h:{}m:{}s_{}.tar'.format(*[*convertSecs(checkpoints[-1]),checkpoints[-1]])
+        path = self.checkpoint_path + 'checkpoint_{}h:{}m:{}s_{}.tar'.format(
+            *[*convertSecs(checkpoints[-1]), checkpoints[-1]])
 
         print('Loaded checkpoint from: {}'.format(path))
         checkpoint = torch.load(path)
@@ -121,7 +125,8 @@ class Trainer(object):
         self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         epoch = checkpoint['epoch']
         training_time = checkpoint['training_time']
-        # torch.cuda.set_rng_state_all(checkpoint['state']) # batch order is restored. unfortunately doesn't work like that.
+        # batch order is restored. unfortunately doesn't work like that.
+        # torch.cuda.set_rng_state_all(checkpoint['state'])
         return epoch, training_time
 
     def compute_val_loss(self):
@@ -136,18 +141,22 @@ class Trainer(object):
                 self.val_data_iterator = self.val_dataset.get_loader().__iter__()
                 val_batch = self.val_data_iterator.next()
 
-            sum_val_loss += self.compute_loss( val_batch).item()
+            sum_val_loss += self.compute_loss(val_batch).item()
 
         return sum_val_loss / num_batches
+
 
 def convertMillis(millis):
     seconds = int((millis / 1000) % 60)
     minutes = int((millis / (1000 * 60)) % 60)
     hours = int((millis / (1000 * 60 * 60)))
+
     return hours, minutes, seconds
+
 
 def convertSecs(sec):
     seconds = int(sec % 60)
     minutes = int((sec / 60) % 60)
     hours = int((sec / (60 * 60)))
+
     return hours, minutes, seconds

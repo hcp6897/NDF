@@ -53,10 +53,10 @@ def config_parser():
 
     # Creating a data test/train/validation split
     parser.add_argument('--class_folders', type=str, default=None,
-                       help='If set to None, the split is created by creating a random sample from all input files. '
-                            'If not None, the split is created per class of objects. Objects of the same class need to '
-                            'be in a common parent folder for this. Variable class_folder is interpreted as glob '
-                            'pattern, suffix of data_dir - i.e. data_dir + class_folder, e.g. class_folder="/*/".')
+                        help='If set to None, the split is created by creating a random sample from all input files. '
+                             'If not None, the split is created per class of objects. Objects of the same class need to '
+                             'be in a common parent folder for this. Variable class_folder is interpreted as glob '
+                             'pattern, suffix of data_dir - i.e. data_dir + class_folder, e.g. class_folder="/*/".')
 
     parser_nval = parser.add_mutually_exclusive_group()
     parser_nval.add_argument('--n_val', type=int,
@@ -81,19 +81,18 @@ def config_parser():
                         help='Number of point samples per object provided to the NDF network during training.\
                             Influences training speed (larger batches result in shorter epochs) but also GPU \
                              memory usage (higher values need more memory). Needs to be balanced with batch_size.')
-    parser.add_argument("--batch_size", type=int, default=4,
+    parser.add_argument("--batch_size", type=int, default=1,
                         help='Number of objects provided to the NDF network in one batch during training.\
                             Influences training speed (larger batches result in shorter epochs) but also GPU \
                              memory usage (higher values need more memory). Needs to be balanced with \
                              num_sample_points_training')
-    parser.add_argument("--num_epochs", type=int, default=1500,
+    parser.add_argument("--num_epochs", type=int, default=100,
                         help='Stopping citron for duration of training. Model converges much earlier: model convergence\
                          can be checked via tensorboard and is logged within the experiment folder.')
     parser.add_argument("--lr", type=float, default=1e-6,
                         help='Learning rate used during training.')
     parser.add_argument("--optimizer", type=str, default='Adam',
                         help='Optimizer used during training.')
-
 
     return parser
 
@@ -111,9 +110,9 @@ def get_config():
 
     if cfg.exp_name is None:
         cfg.exp_name = 'data-{}dist-{}sigmas-{}res-{}'.format(
-                                                        os.path.basename(cfg.data_dir),
-                                                        ''.join(str(e) + '_' for e in cfg.sample_ratio),
-                                                        ''.join(str(e) + '_' for e in cfg.sample_std_dev),
-                                                        cfg.input_res)
+            os.path.basename(cfg.data_dir),
+            ''.join(str(e) + '_' for e in cfg.sample_ratio),
+            ''.join(str(e) + '_' for e in cfg.sample_std_dev),
+            cfg.input_res)
 
     return cfg

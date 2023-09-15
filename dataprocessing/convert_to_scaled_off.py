@@ -1,27 +1,15 @@
+import logging
 import os
-import glob
-import multiprocessing as mp
-from multiprocessing import Pool
-import trimesh
-import random
 import sys
 import traceback
-import logging
-
-# 先加入绝对路径，否则会报错，注意__file__表示的是当前执行文件的路径
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))    
-
-import configs.config_loader as cfg_loader
-
+import trimesh
 
 logger = logging.getLogger()
 logger.setLevel(logging.ERROR)
 
 
 class HiddenPrints:
-    
+
     def __enter__(self):
         self._original_stdout = sys.stdout
         sys.stdout = open(os.devnull, 'w')
@@ -37,7 +25,7 @@ def as_mesh(scene_or_mesh):
     If conversion occurs, the returned mesh has only vertex and face data.
     Suggested by https://github.com/mikedh/trimesh/issues/507
     """
-    
+
     if isinstance(scene_or_mesh, trimesh.Scene):
         if len(scene_or_mesh.geometry) == 0:
             mesh = None  # empty scene
@@ -45,18 +33,18 @@ def as_mesh(scene_or_mesh):
             # we lose texture information here
             mesh = trimesh.util.concatenate(
                 tuple(trimesh.Trimesh(vertices=g.vertices, faces=g.faces)
-                    for g in scene_or_mesh.geometry.values()))
+                      for g in scene_or_mesh.geometry.values()))
     else:
-        assert(isinstance(scene_or_mesh, trimesh.Trimesh))
+        assert (isinstance(scene_or_mesh, trimesh.Trimesh))
         mesh = scene_or_mesh
-        
+
     return mesh
 
 
 def to_off(path):
     file_path = os.path.dirname(path)
     file_name = os.path.splitext(os.path.basename(path))[0]
-    output_file = os.path.join(file_path,file_name + '_scaled.off')
+    output_file = os.path.join(file_path, file_name + '_scaled.off')
 
     if os.path.exists(output_file):
         print('Exists: {}'.format(output_file))
@@ -76,4 +64,3 @@ def to_off(path):
         print('Finished: {}'.format(path))
     except:
         print('Error with {}: {}'.format(path, traceback.format_exc()))
-
