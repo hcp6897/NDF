@@ -44,8 +44,7 @@ Then use our data preparation code (see below).
 ## Quick Start with Pretrained Model
 Alternatively, to quickly start, you can download the readily prepared data for raw, (not closed) ShapeNet cars: 
 10.000 input points are given to the network as input to infer the detailed, continuous surface.
-Please download the needed data from [here](https://nextcloud.mpi-klsb.mpg.de/index.php/s/Nc6qWEfseH7J7Sz),
-and unzip it into `shapenet/data` - unzipped files require 150 GB free space.
+Please download the needed data from [here](https://nextcloud.mpi-klsb.mpg.de/index.php/s/Nc6qWEfseH7J7Sz), and unzip it into `shapenet/data` - unzipped files require 150 GB free space.
 
 
 Next, you can start generation of instances from the test set via

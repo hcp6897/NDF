@@ -1,0 +1,1 @@
+tensorboard --logdir experiments/shapenet_cars/summary/ --host 0.0.0.0

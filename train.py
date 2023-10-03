@@ -29,7 +29,7 @@ val_dataset = voxelized_data.VoxelizedDataset('val',
                                               split_file=cfg.split_file,
                                               batch_size=cfg.batch_size,
                                               num_sample_points=cfg.num_sample_points_training,
-                                              num_workers=30,
+                                              num_workers=20,
                                               sample_distribution=cfg.sample_ratio,
                                               sample_sigmas=cfg.sample_std_dev)
 
